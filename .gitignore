@@ -9,7 +9,8 @@ db.sqlite3
 /media
 /staticfiles
 
-# Virtual environment
+# Virtual environment stuff
+.env 
 dashboard-env/
 venv/
 env/
