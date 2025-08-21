@@ -1,8 +1,9 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib import messages
+from django.contrib.auth.views import LoginView, LogoutView
 
-from .forms import UserRegistrationForm
+from .forms import UserRegistrationForm, LoginForm
 
 
 # Create your views here.
@@ -20,3 +21,11 @@ def register(request):
     else:
         form = UserRegistrationForm()
     return render(request, "accounts/register.html", { "form":form })    
+
+
+class CustomLoginView(LoginView):
+    template_name = "accounts/login.html"
+    authentication_form = LoginForm
+
+class CustomLogoutView(LogoutView):
+    next_page = "/"
