@@ -15,7 +15,7 @@ class CustomeUserManager(BaseUserManager):
         
         email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
-        user.set_password(password)
+        user.set_password(password) # this is for hashing the password
         user.save(using=self._db)
         return user
     
