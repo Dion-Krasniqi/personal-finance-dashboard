@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Home-Finance Dashbaord{% endblock %}
+{% block content %}
+    <h1>Welcome{% if user.is_authenticated %}, {{user.email}}{% endif %}!</h1>
+    {% if user.is_authenticated %}
+        <p>You're logged in.</p>
+    {% else %}
+        <p>Want to <a href = "{% url 'login' %}">login</a> or <a href = "{% url 'register' %}">register</a></p>
+    {% endif %}
+{% endblock %} 

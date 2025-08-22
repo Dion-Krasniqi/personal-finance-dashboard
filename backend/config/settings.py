@@ -57,16 +57,16 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / "templates"],
         'APP_DIRS': True,
         'OPTIONS': {
-            'context_processors': [
+          'context_processors': [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
         },
-    },
+   },
 ]
 
 WSGI_APPLICATION = 'config.wsgi.application'
@@ -125,3 +125,9 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = "accounts.CustomUser" # We're telling django to use this instead of the built-in
+
+# Telling where to redirect after login/logout
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"
+
+TEMPLATES[0]["DIRS"] = [BASE_DIR / "templates"] # is changing the entry at the TEMPLATES def higher
