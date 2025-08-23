@@ -126,8 +126,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = "accounts.CustomUser" # We're telling django to use this instead of the built-in
 
+
+LOGIN_URL = "/accounts/login/"  # Telling where if user not logged in
 # Telling where to redirect after login/logout
-LOGIN_REDIRECT_URL = "/"
+LOGIN_REDIRECT_URL = "/accounts/dashboard/"
 LOGOUT_REDIRECT_URL = "/"
 
 # TEMPLATES[0]["DIRS"] = [BASE_DIR / "templates"] # is changing the entry at the TEMPLATES def higher

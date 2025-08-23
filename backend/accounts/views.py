@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.views import LoginView, LogoutView
 from django.views.generic import CreateView
 from django.urls import reverse_lazy
+from django.contrib.auth.decorators import login_required
 
 from .forms import UserRegistrationForm, LoginForm, RegistrationForm
 from .models import CustomUser
@@ -38,3 +39,7 @@ class RegisterView(CreateView):
     form_class = RegistrationForm
     template_url = "accounts/register.html"
     success_url = reverse_lazy("login") # after registering, redirects to log in
+
+@login_required
+def dashboard(request):
+    return render(request, "accounts/dashboard.html", { "user": request.user })
