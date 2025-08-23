@@ -2,8 +2,11 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib import messages
 from django.contrib.auth.views import LoginView, LogoutView
+from django.views.generic import CreateView
+from django.urls import reverse_lazy
 
-from .forms import UserRegistrationForm, LoginForm
+from .forms import UserRegistrationForm, LoginForm, RegistrationForm
+from .models import CustomUser
 
 
 # Create your views here.
@@ -29,3 +32,9 @@ class CustomLoginView(LoginView):
 
 class CustomLogoutView(LogoutView):
     next_page = "/"
+
+class RegisterView(CreateView):
+    model = CustomUser
+    form_class = RegistrationForm
+    template_url = "accounts/register.html"
+    success_url = reverse_lazy("login") # after registering, redirects to log in

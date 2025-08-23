@@ -130,4 +130,4 @@ AUTH_USER_MODEL = "accounts.CustomUser" # We're telling django to use this inste
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 
-TEMPLATES[0]["DIRS"] = [BASE_DIR / "templates"] # is changing the entry at the TEMPLATES def higher
+# TEMPLATES[0]["DIRS"] = [BASE_DIR / "templates"] # is changing the entry at the TEMPLATES def higher
