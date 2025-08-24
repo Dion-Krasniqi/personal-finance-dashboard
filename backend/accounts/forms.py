@@ -42,3 +42,8 @@ class RegistrationForm(UserCreationForm):
     class Meta:
         model = CustomUser
         fields = ["email", "password1", "password2"]
+
+
+class FeedbackForm(forms.Form):
+    subject = forms.CharField(max_length = 100, required = True)
+    message = forms.CharField(widget = forms.Textarea, required = True)

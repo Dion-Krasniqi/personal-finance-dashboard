@@ -3,5 +3,5 @@
 {% block content %}
     <h1>Welcome, {{ user.email }}</h1>
     <p>You are logged in. This is the dashboard</p>
-
+    <a href = "{% url 'feedback' %}">Have feedback?</a>
 {% endblock content %}

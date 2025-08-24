@@ -6,7 +6,7 @@ from django.views.generic import CreateView
 from django.urls import reverse_lazy
 from django.contrib.auth.decorators import login_required
 
-from .forms import UserRegistrationForm, LoginForm, RegistrationForm
+from .forms import UserRegistrationForm, LoginForm, RegistrationForm, FeedbackForm
 from .models import CustomUser
 
 
@@ -43,3 +43,16 @@ class RegisterView(CreateView):
 @login_required
 def dashboard(request):
     return render(request, "accounts/dashboard.html", { "user": request.user })
+
+def feedback_view(request):
+    if request.method == "POST":
+        form = FeedbackForm(request.POST)
+        if form.is_valid():
+            subject = form.cleaned_data["subject"]
+            message = form.cleaned_data["message"]
+            print("Feedback sent") # replace with functionality
+            return render(request, "accounts/feedbacksent.html") 
+    else:
+        form = FeedbackForm()
+
+    return render(request, "accounts/feedback.html", { "form":form })
