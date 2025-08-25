@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django.contrib import messages
 from django.contrib.auth.views import LoginView, LogoutView
@@ -7,7 +7,7 @@ from django.urls import reverse_lazy
 from django.contrib.auth.decorators import login_required
 
 from .forms import UserRegistrationForm, LoginForm, RegistrationForm, FeedbackForm
-from .models import CustomUser
+from .models import CustomUser, Feedback
 
 
 # Create your views here.
@@ -51,9 +51,27 @@ def feedback_view(request):
             feedback = form.save(commit = False)
             feedback.user = request.user
             feedback.save()
-            message = form.cleaned_data["message"]
             return render(request, "accounts/feedbacksent.html") 
     else:
         form = FeedbackForm()
 
     return render(request, "accounts/feedback.html", { "form":form })
+
+
+@login_required
+def feedback_list(request):
+    if request.user.is_staff:
+        feedbacks = Feedback.objects.all()
+    else:
+        feedbacks = Feedback.objects.filter(user = request.user)
+
+    return render(request, "accounts/feedback_list.html", {"feedbacks" : feedbacks})
+
+@login_required
+def delete_feedback(request, feedback_id):
+    feedback = get_object_or_404(Feedback, id = feedback_id)
+    
+    if feedback.user == request.user or request.user.is_staff:
+        feedback.delete()
+    
+    return redirect("feedback_list")

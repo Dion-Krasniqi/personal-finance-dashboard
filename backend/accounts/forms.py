@@ -44,7 +44,10 @@ class RegistrationForm(UserCreationForm):
         fields = ["email", "password1", "password2"]
 
 
-class FeedbackForm(forms.Form):
+class FeedbackForm(forms.ModelForm):
     class Meta:
         model = Feedback 
-        fields = ["message"] # everything except from message is auto, message is user filled
+        fields = ['message'] # everything except from message is auto, message is user filled
+        widgets = {
+            'message' : forms.Textarea(attrs = {'rows' : 4 , 'cols' : 40}),
+        }

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Your feedback entries</h2>
+
+    {% if feedbacks %}
+        <ul>
+            {% for fb in feedbacks %}
+             <li>
+                <strong>{{fb.user.email}}</strong>: {{fb.text}}
+                <em>{{ fb.created_at }}</em>
+
+                <form action = "{% url 'delete_feedback' fb.id %}" method = "post" style = "display: inline;">
+                    {% csrf_token %}
+                    <button type = "submit">Delete</button>
+                </form>
+             </li>
+             {% endfor %}
+        </ul>
+        
+    {% else %}
+    <p>No feedback submitted</p>
+    {% endif %}
+    <a href = "{% url 'dashboard' %}">Return to dashboard</a>
+
+{% endblock %}

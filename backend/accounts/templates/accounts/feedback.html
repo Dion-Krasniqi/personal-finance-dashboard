@@ -3,8 +3,13 @@
     <h2>Feedback Form</h2>
     <form method = "post">
         {% csrf_token %}
-        {{ form.as_p }}
+        {{ form.non_field_errors }}
+        <div>
+            {{ form.message.label.tag }}
+            {{ form.message }}
+            {{ form.message.errors }}
+        </div>
         <button type = "submit">Send</button>
     </form>
-    <a href = "{% url 'dashboard'}">Return to dashboard</a>
+    <a href = "{% url 'dashboard' %}">Return to dashboard</a>
 {% endblock %}
