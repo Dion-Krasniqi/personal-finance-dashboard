@@ -48,9 +48,10 @@ def feedback_view(request):
     if request.method == "POST":
         form = FeedbackForm(request.POST)
         if form.is_valid():
-            subject = form.cleaned_data["subject"]
+            feedback = form.save(commit = False)
+            feedback.user = request.user
+            feedback.save()
             message = form.cleaned_data["message"]
-            print("Feedback sent") # replace with functionality
             return render(request, "accounts/feedbacksent.html") 
     else:
         form = FeedbackForm()

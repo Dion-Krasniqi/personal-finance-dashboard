@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 
-from .models import CustomUser
+from .models import CustomUser, Feedback
 
 CustomUser = get_user_model()
 
@@ -45,5 +45,6 @@ class RegistrationForm(UserCreationForm):
 
 
 class FeedbackForm(forms.Form):
-    subject = forms.CharField(max_length = 100, required = True)
-    message = forms.CharField(widget = forms.Textarea, required = True)
+    class Meta:
+        model = Feedback 
+        fields = ["message"] # everything except from message is auto, message is user filled

@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager # django default modelS
-
+from django.conf import settings
 
 
 
@@ -48,4 +48,12 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
+
+class Feedback(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete = models.CASCADE)
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add = True)
+
+    def __str__(self):
+        return f"Feedback from {self.user.email} at {self.created_at}. Message: {self.message}"
 
