@@ -6,7 +6,7 @@ from django.views.generic import CreateView
 from django.urls import reverse_lazy
 from django.contrib.auth.decorators import login_required
 
-from .forms import UserRegistrationForm, LoginForm, RegistrationForm, FeedbackForm
+from .forms import UserRegistrationForm, LoginForm, RegistrationForm, FeedbackForm, ProfileForm
 from .models import CustomUser, Feedback
 
 
@@ -75,3 +75,18 @@ def delete_feedback(request, feedback_id):
         feedback.delete()
     
     return redirect("feedback_list")
+
+@login_required
+def profile_view(request):
+    user = request.user
+
+    if request.method == "POST":
+        form = ProfileForm(request.POST, instance = user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Profile update successfully")
+            return redirect("profile")
+    else:
+            form = ProfileForm(instance = user)
+
+    return render(request, "accounts/profile.html", {"form" : form})

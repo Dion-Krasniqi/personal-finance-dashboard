@@ -51,3 +51,11 @@ class FeedbackForm(forms.ModelForm):
         widgets = {
             'message' : forms.Textarea(attrs = {'rows' : 4 , 'cols' : 40}),
         }
+
+class ProfileForm(forms.ModelForm):
+    class Meta:
+        model = CustomUser
+        fields = ["email"]
+        widgets = {
+            "email" : forms.EmailInput(attrs = {"class" : "form-control"}),
+        }

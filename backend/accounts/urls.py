@@ -11,5 +11,6 @@ urlpatterns = [
     path("feedback/", views.feedback_view, name = "feedback"),
     path("feedback/list", views.feedback_list, name = "feedback_list"),
     path("feedback/delete/<int:feedback_id>/", views.delete_feedback, name = "delete_feedback"),
+    path("profile/", views.profile_view, name = "profile"),
     
 ]
