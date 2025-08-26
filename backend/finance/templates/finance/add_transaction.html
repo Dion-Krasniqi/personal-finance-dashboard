@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        <h2>Add Transaction</h2>
+        <form method = "post">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+            <div>
+                {{ form.amount_label_tag }}
+                {{ form.amount }}
+                {{ form.amount.errors }}
+            </div>
+            <div>
+                {{ form.description_label_tag }}
+                {{ form.description }}
+                {{ form.description.errors }}
+            </div>
+            <div>
+                {{ form.type_label_tag }}
+                {{ form.type }}
+                {{ form.type.errors }}
+            </div>
+            <button type = "submit">Add</button>
+        </form> 
+    </body>
+</html>
