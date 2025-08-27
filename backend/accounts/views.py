@@ -5,6 +5,8 @@ from django.contrib.auth.views import LoginView, LogoutView
 from django.views.generic import CreateView
 from django.urls import reverse_lazy
 from django.contrib.auth.decorators import login_required
+from finance.models import Transaction
+from django.db.models import Sum
 
 from .forms import UserRegistrationForm, LoginForm, RegistrationForm, FeedbackForm, ProfileForm
 from .models import CustomUser, Feedback
@@ -42,7 +44,18 @@ class RegisterView(CreateView):
 
 @login_required
 def dashboard(request):
-    return render(request, "accounts/dashboard.html", { "user": request.user })
+    user = request.user
+
+    income = Transaction.objects.filter(user = user, type = 'income').aggregate(total = Sum('amount'))['total'] or 0 # if there isnt any, it doesnt return None but 0
+    expenses = Transaction.objects.filter(user = user, type = 'expense').aggregate(total = Sum('amount'))['total'] or 0
+    balance = income - expenses
+
+    return render(request, "accounts/dashboard.html", { "user" : user,
+                                                        "income" : income,
+                                                        "expenses" : expenses,
+                                                        "balance" : balance,
+                                                    })
+
 
 def feedback_view(request):
     if request.method == "POST":
