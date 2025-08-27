@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        <h2>Your Transactions</h2>
+        {% if transactions %}
+            <table border = "1" cellpadding = "5">
+                <tr>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th>Description</th>
+                </tr>
+                {% for t in transactions %}
+                    <tr>
+                        <td>{{ t.date }}</td>
+                        <td>{{ t.get_type_display }}</td>
+                        <td>{{ t.amount }}</td>
+                        <td>{{ t.description|default:"-" }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% else %}
+            <p>You have no transactions.</p>
+        {% endif %}
+        
+    </body>
+</html>
