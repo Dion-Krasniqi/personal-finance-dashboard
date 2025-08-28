@@ -3,6 +3,17 @@
 {% block content %}
     <h1>Welcome, {{ user.email }}</h1>
     <p>You are logged in. This is the dashboard</p>
+    <form method = "get" style = "margin-bottom:20px;">
+        <label for = "type">Type:</label>
+        <select name = "type" id = "type">
+            <option value = "all" {% if filter_type == 'all' %}selected{% endif %}>All</option>
+            <option value = "income" {% if filter_type == 'income' %}selected{% endif %}>Income</option>
+            <option value = "expense" {% if filter_type == 'expense' %}selected{% endif %}>Expense</option>
+        </select>
+        <label for = "month">Month:</label>
+        <input type = "month" name = "month" id = "month" value = "{{ month }}">
+        <button type = "submit">Filter</button>
+    </form>
     <p><strong>Total income: </strong>{{ income }}</p>
     <p><strong>Total expenses: </strong>{{ expenses }}</p>
     <p><strong>Balance: </strong>{{ balance }}</p>
@@ -10,4 +21,5 @@
     <a href = "{% url 'feedback' %}">Have feedback?</a>
     <a href = "{% url 'feedback_list' %}">View your feedback</a>
     <a href = "{% url 'list_transactions' %}">Check your transactions</a>
+    <a href = "{% url 'add_transaction' %}">Add a transaction</a>
 {% endblock content %}

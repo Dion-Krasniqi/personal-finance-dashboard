@@ -22,6 +22,7 @@
         {% else %}
             <p>You have no transactions.</p>
         {% endif %}
-        
+        <a href = "{% url 'add_transaction' %}">Add a transaction</a>
+        <a href = "{% url 'dashboard' %}">Go back to dashboard</a>
     </body>
 </html>

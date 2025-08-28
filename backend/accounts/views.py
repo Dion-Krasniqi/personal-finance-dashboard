@@ -46,14 +46,31 @@ class RegisterView(CreateView):
 def dashboard(request):
     user = request.user
 
-    income = Transaction.objects.filter(user = user, type = 'income').aggregate(total = Sum('amount'))['total'] or 0 # if there isnt any, it doesnt return None but 0
-    expenses = Transaction.objects.filter(user = user, type = 'expense').aggregate(total = Sum('amount'))['total'] or 0
+    transactions = Transaction.objects.filter(user = user).order_by('-date')
+
+    filter_type = request.GET.get('type', 'all')
+    if filter_type in ['income', 'expense']:
+        transactions = transactions.filter(type = filter_type)
+
+    month = request.GET.get('month')
+    if month:
+        try:
+            year, month_num = map(int, month.split('-'))
+            transactions = transactions.filter(date__year = year, date__month = month_num)
+        except ValueError:
+            pass
+        
+
+    income = transactions.filter(type = 'income').aggregate(total = Sum('amount'))['total'] or 0 # if there isnt any, it doesnt return None but 0
+    expenses = transactions.filter(type = 'expense').aggregate(total = Sum('amount'))['total'] or 0
     balance = income - expenses
 
-    return render(request, "accounts/dashboard.html", { "user" : user,
+    return render(request, "accounts/dashboard.html", { "transactions" : transactions,
                                                         "income" : income,
                                                         "expenses" : expenses,
                                                         "balance" : balance,
+                                                        "filter_type" : filter_type,
+                                                        "month" : month,
                                                     })
 
 
