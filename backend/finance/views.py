@@ -1,5 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from .utils import filter_transactions
+
 from .forms import TransactionForm
 from .models import Transaction
 
@@ -21,6 +23,10 @@ def add_transaction(request):
 
 @login_required
 def list_transactions(request):
-    transactions = Transaction.objects.filter(user = request.user).order_by('-date')
+    qs = Transaction.objects.filter(user = request.user).order_by('-date')
+    transactions, type_filter, search_query, start_date, end_date = filter_transactions(request, qs)
 
-    return render(request, 'finance/list_transactions.html', {'transactions' : transactions})
+    return render(request, 'finance/list_transactions.html', {'transactions' : transactions,
+                                                              "search_query" : search_query,
+                                                              "start_date" : start_date,
+                                                              "end_date" : end_date,})

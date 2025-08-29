@@ -2,24 +2,42 @@
 
 {% block content %}
     <h1>Welcome, {{ user.email }}</h1>
-    <p>You are logged in. This is the dashboard</p>
-    <form method = "get" style = "margin-bottom:20px;">
-        <label for = "type">Type:</label>
-        <select name = "type" id = "type">
-            <option value = "all" {% if filter_type == 'all' %}selected{% endif %}>All</option>
-            <option value = "income" {% if filter_type == 'income' %}selected{% endif %}>Income</option>
-            <option value = "expense" {% if filter_type == 'expense' %}selected{% endif %}>Expense</option>
-        </select>
-        <label for = "month">Month:</label>
-        <input type = "month" name = "month" id = "month" value = "{{ month }}">
-        <button type = "submit">Filter</button>
-    </form>
+    <p>You are logged in. This is the dashboard.</p>
+
+    <form method = "get">
+            <input type="radio" name="type" value="all" {% if filter_type == 'all' %}checked{% endif %}>
+            All
+        </label>
+        <label style="margin-left:10px;">
+            <input type="radio" name="type" value="income" {% if filter_type == 'income' %}checked{% endif %}>
+            Income
+        </label>
+        <label style="margin-left:10px;">
+            <input type="radio" name="type" value="expense" {% if filter_type == 'expense' %}checked{% endif %}>
+            Expense
+        </label>
+            <input type = "text" name = "search" placeholder = "Search description" value = "{{ search_query }}">
+            <button type = "submit">Filter</button>
+            <a href = "{% url 'dashboard' %}">Reset</a>
+        </form>
+
     <p><strong>Total income: </strong>{{ income }}</p>
     <p><strong>Total expenses: </strong>{{ expenses }}</p>
     <p><strong>Balance: </strong>{{ balance }}</p>
-    
-    <a href = "{% url 'feedback' %}">Have feedback?</a>
-    <a href = "{% url 'feedback_list' %}">View your feedback</a>
-    <a href = "{% url 'list_transactions' %}">Check your transactions</a>
-    <a href = "{% url 'add_transaction' %}">Add a transaction</a>
+
+    <h2>Transactions for this month</h2>
+    <ul>
+        {% for transaction in transactions %}
+            <li>
+                {{ transaction.date }} — {{ transaction.type }} — {{ transaction.description }} — {{ transaction.amount }}
+            </li>
+        {% empty %}
+            <li>No transactions this month.</li>
+        {% endfor %}
+    </ul>
+
+    <a href="{% url 'feedback' %}">Have feedback?</a>
+    <a href="{% url 'feedback_list' %}">View your feedback</a>
+    <a href="{% url 'list_transactions' %}">Check all transactions</a>
+    <a href="{% url 'add_transaction' %}">Add a transaction</a>
 {% endblock content %}

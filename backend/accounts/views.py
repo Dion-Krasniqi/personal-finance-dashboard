@@ -5,11 +5,14 @@ from django.contrib.auth.views import LoginView, LogoutView
 from django.views.generic import CreateView
 from django.urls import reverse_lazy
 from django.contrib.auth.decorators import login_required
+from django.utils.timezone import now
 from finance.models import Transaction
+from finance.utils import filter_transactions
 from django.db.models import Sum
 
 from .forms import UserRegistrationForm, LoginForm, RegistrationForm, FeedbackForm, ProfileForm
 from .models import CustomUser, Feedback
+
 
 
 # Create your views here.
@@ -45,21 +48,12 @@ class RegisterView(CreateView):
 @login_required
 def dashboard(request):
     user = request.user
+    today = now().date()
+    year, month = today.year, today.month
 
-    transactions = Transaction.objects.filter(user = user).order_by('-date')
 
-    filter_type = request.GET.get('type', 'all')
-    if filter_type in ['income', 'expense']:
-        transactions = transactions.filter(type = filter_type)
-
-    month = request.GET.get('month')
-    if month:
-        try:
-            year, month_num = map(int, month.split('-'))
-            transactions = transactions.filter(date__year = year, date__month = month_num)
-        except ValueError:
-            pass
-        
+    qs = Transaction.objects.filter(user = user, date__year = today.year, date__month = today.month)
+    transactions, filter_type, search_query, start_date, end_date = filter_transactions(request, qs)
 
     income = transactions.filter(type = 'income').aggregate(total = Sum('amount'))['total'] or 0 # if there isnt any, it doesnt return None but 0
     expenses = transactions.filter(type = 'expense').aggregate(total = Sum('amount'))['total'] or 0
@@ -69,8 +63,7 @@ def dashboard(request):
                                                         "income" : income,
                                                         "expenses" : expenses,
                                                         "balance" : balance,
-                                                        "filter_type" : filter_type,
-                                                        "month" : month,
+                                                        "search_query" : search_query,
                                                     })
 
 
