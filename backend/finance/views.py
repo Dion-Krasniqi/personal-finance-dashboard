@@ -1,6 +1,9 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 from .utils import filter_transactions
+from plaid import Client, environments
+import os
 
 from .forms import TransactionForm
 from .models import Transaction
@@ -30,3 +33,25 @@ def list_transactions(request):
                                                               "search_query" : search_query,
                                                               "start_date" : start_date,
                                                               "end_date" : end_date,})
+
+
+
+PLAID_CLIENT_ID = os.environ.get('PLAID_CLIENT_ID')
+PLAID_SECRET = os.environ.get('PLAID_SECRET')
+client = Client(
+    client_id = PLAID_CLIENT_ID,
+    secret = PLAID_SECRET,
+    environment = environments.Development, # could call it Sandbox or Prodcution
+)
+def get_plaid_token(request):
+    try:
+        link_token_request = {'user' : {'client_user_id' : str(request.user.id)},
+                              'client_name' : 'Finance Board',
+                              'products' : ['transactions'],
+                              'country_codes' : ['US'],
+                              'language' : 'en',
+                              }
+        response = client.link_token_create(link_token_request)
+        return JsonResponse(response)
+    except Exception as e:
+        return JsonResponse({'error' : str(e)}, status = 500)
