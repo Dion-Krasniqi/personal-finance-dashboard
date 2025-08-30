@@ -3,6 +3,9 @@
 {% block content %}
     <h1>Welcome, {{ user.email }}</h1>
     <p>You are logged in. This is the dashboard.</p>
+    <div style = "margin:20px;">
+        <button id = "connect-bank" style = "padding:10px; font-size:16px;">Connect your bank</button>
+    </div>
 
     <form method = "get">
             <input type="radio" name="type" value="all" {% if filter_type == 'all' %}checked{% endif %}>
@@ -40,4 +43,44 @@
     <a href="{% url 'feedback_list' %}">View your feedback</a>
     <a href="{% url 'list_transactions' %}">Check all transactions</a>
     <a href="{% url 'add_transaction' %}">Add a transaction</a>
+
+    <!--Plaid-->
+    <script src = "https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
+    <scipt>
+        const connectButon = document.getElementById('connect-bank');
+
+        connectButon.addEventListener('click', async () => {
+            try {
+                const response = await fetch('{% url "get_plaid_token" %}',{
+                    headers: {
+                        'Content-Type' : 'application/json'
+                    },
+                });
+                if (!response.ok){
+                    throw new Error('Failed to get link token');
+                }
+                const data = await response.json();
+                const linkToken = data.link_token;
+
+                const handler = Plaid.create({
+                    token : linkToken,
+                    onSuccess : async (public_token, metadata) => {
+                        console.log('Public token recieved:', public_token);
+                        console.log('Metadata:', metadata)
+                    },
+                    onExit : (err, metadata) => {
+                        console.log('Plaid link exited.');
+                        if (err != null){
+                            console.error('Plaid link error:', err);
+                        }
+                    },
+                });
+
+                handler.open()
+            } catch (error) {
+                console.error('Error connecting to bank:', error);
+                alert('Could not connect to Plaid. Please try again later.');
+            }
+        });
+    </scipt>
 {% endblock content %}
