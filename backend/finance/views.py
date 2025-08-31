@@ -1,9 +1,10 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from django.views.decorators import csrf_excempt
 from django.http import JsonResponse
 from .utils import filter_transactions
 from plaid import Client, environments
-import os
+import os, json
 
 from .forms import TransactionForm
 from .models import Transaction
@@ -43,6 +44,7 @@ client = Client(
     secret = PLAID_SECRET,
     environment = environments.Development, # could call it Sandbox or Prodcution
 )
+
 def get_plaid_token(request):
     try:
         link_token_request = {'user' : {'client_user_id' : str(request.user.id)},
@@ -55,3 +57,22 @@ def get_plaid_token(request):
         return JsonResponse(response)
     except Exception as e:
         return JsonResponse({'error' : str(e)}, status = 500)
+
+@csrf_excempt # just for the current setup
+@login_required
+def save_access_token(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            public_token = data.get('public_token') 
+            exchange_response = client.item_public_token_exchange(public_token) # gives public key and recives perm access key
+            request.user.access_token = exchange_response.get('access_token')
+            request.user.item_id = exchange_response.get('item_id')
+            request.user.save()
+            return JsonResponse({'success':True},)
+        except Exception as e:
+            return JsonResponse({'error' : str(e)}, status = 500) 
+
+    
+    return JsonResponse({'error' : 'Invalid request method'}, status = 400)  
+    
