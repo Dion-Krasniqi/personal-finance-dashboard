@@ -46,14 +46,17 @@
 
     <!--Plaid-->
     <script src = "https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
+    {% csrf_token %}
     <scipt>
+        const csrfToken = decoment.querySelector('[name = csrfmiddlewaretoken]').value;
         const connectButon = document.getElementById('connect-bank');
 
         connectButon.addEventListener('click', async () => {
             try {
                 const response = await fetch('{% url "get_plaid_token" %}',{
                     headers: {
-                        'Content-Type' : 'application/json'
+                        'Content-Type' : 'application/json',
+                        'X-CSRFToken' : csrfToken,
                     },
                 });
                 if (!response.ok){
@@ -66,7 +69,30 @@
                     token : linkToken,
                     onSuccess : async (public_token, metadata) => {
                         console.log('Public token recieved:', public_token);
-                        console.log('Metadata:', metadata)
+                        console.log('Metadata:', metadata);
+
+                        try {
+                            const saveResponse = await fetch('{% url 'save_access_token' %}',
+                            {method : 'POST',
+                             headers : {
+                                'Content-Type' : 'application/json',
+                                'X-CSRFToken' : csrfToken,
+                             },
+                             body : JSON.stringify({public_token : public_token})
+                        });
+                            const saveResult = await saveResponse.json();
+                            if (saveResult.success){
+                                console.log('Access token saved successfully!');
+                                alert('Bank account connected successfully!');
+                            }else {
+                                console.error('Failed to save access token:', saveResult.error);
+                                alert('An error occured while saving the bank connection.');
+                            }
+                        } catch (error) {
+                            console.error('Error saving access token:', error);
+                            alert('An error occured while communicating with the server');
+
+                        }
                     },
                     onExit : (err, metadata) => {
                         console.log('Plaid link exited.');
