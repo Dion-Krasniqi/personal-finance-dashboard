@@ -16,6 +16,16 @@ class Transaction(models.Model):
         max_length = 10,
         choices = [("income", "Income"), ("expense", "Expense")]
     )
+    transaction_id = models.CharField(max_length = 100, unique = True, blank = True, null = True)
 
     def __str__(self):
         return f"{self.user.email} - {self.type} : {self.amount}"
+
+class PlaidCredentials(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete = models.CASCADE, #links to custom user from accounts app
+    )
+
+    access_token = models.CharField(max_length=100, null=True)
+    item_id = models.CharField(max_length=100,null=True)
