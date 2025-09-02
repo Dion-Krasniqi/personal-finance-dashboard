@@ -47,8 +47,8 @@ def list_transactions(request):
 
 
 # plaid setup
-PLAID_CLIENT_ID = '68b6bde430c9690024a8d65f'
-PLAID_SECRET = '8f65880f5ebd52474ed02ea7468e23'
+PLAID_CLIENT_ID = os.getenv('PLAID_CLIENT_ID')
+PLAID_SECRET = os.getenv('PLAID_SECRET')
 configuration = plaid.Configuration(
     host = plaid.Environment.Sandbox,
     api_key = {
