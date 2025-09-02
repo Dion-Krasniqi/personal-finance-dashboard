@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block content %}
+
+    <script src = "https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
+    
+    <h1>Connect your bank account</h1>
+    <p>Use Plaid for a secure connection</p>
+    <button id="plaid-button">Connect account</button>
+    <div id="message-area"></div>
+    {% csrf_token %}
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const connectButon = document.getElementById("plaid-button");
+            const messageArea = document.getElementById("message-area");
+
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+            const showMessage = (message, isError = false) => {
+                messageArea.textContent = message;
+                messageArea.style.color = isError ? 'red':'green';
+            };
+
+            connectButon.addEventListener('click', async () => {
+                showMessage("Connecting to Plaid...");
+
+                try {
+                    const response = await fetch('{% url "get_plaid_token" %}');
+                    if (!response.ok) {
+                        throw new Error('Failed to get link token.');
+                    }
+                    const data = await response.json();
+                    const linkToken = data.link_token;
+
+                    const handler = Plaid.create({
+                        token: linkToken,
+                        onSuccess: async (public_token, metadata) => {
+                            showMessage("Connection successful. Saving credentials...");
+
+                            const saveResponse = await fetch('{% url "save_access_token" %}', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRFToken': csrfToken,
+                                },
+                                body: JSON.stringify({public_token : public_token}),
+                            });
+
+                            if (!saveResponse.ok) {
+                                throw new Error('Failed to save access token.');
+                            }
+
+                            const saveResult = await saveResponse.json();
+                            if(saveResult.success) {
+                                showMessage('Bank account connected successfully!');
+                            }else {
+                                showMessage('An error occured while saving the bank connection', true);
+                            }
+                        },
+                        onExit: (err, metadata) => {
+                            if (err!=null && err.error_code !== "CANCELLED"){
+                                showMessage('Plaid link error: ${err.error_message}', true);
+                            }else {
+                                showMessage('Plaid link flow was cancelled', true);
+                            }
+                        },
+                    });
+                    handler.open();
+
+                }catch (error) {
+                    showMessage('An error has occured: ${error.error_message}', true);
+                }
+            });
+        });
+    </script>
+    
+
+{% endblock content %}

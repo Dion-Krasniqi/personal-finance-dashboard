@@ -11,7 +11,9 @@ from plaid.model.products import Products
 from plaid.model.country_code import CountryCode
 from plaid.model.item_public_token_exchange_request import ItemPublicTokenExchangeRequest
 from plaid.exceptions import ApiException
+from plaid.model.transactions_sync_request import TransactionsSyncRequest
 import os, json, logging
+from dotenv import load_dotenv
 
 from .forms import TransactionForm
 from .models import Transaction, PlaidCredentials
@@ -45,30 +47,32 @@ def list_transactions(request):
 
 
 # plaid setup
-PLAID_CLIENT_ID = os.environ.get('PLAID_CLIENT_ID')
-PLAID_SECRET = os.environ.get('PLAID_SECRET')
+PLAID_CLIENT_ID = '68b6bde430c9690024a8d65f'
+PLAID_SECRET = '8f65880f5ebd52474ed02ea7468e23'
 configuration = plaid.Configuration(
     host = plaid.Environment.Sandbox,
     api_key = {
-        'clientID' : PLAID_CLIENT_ID,
+        'clientId' : PLAID_CLIENT_ID,
         'secret' : PLAID_SECRET,
-        'plaid-version' : '2025-08-13'
     }
 )
 
 api_client = plaid.ApiClient(configuration)
 client = plaid_api.PlaidApi(api_client)
 
+@csrf_exempt
 @login_required
 def get_plaid_token(request):
-    try:
-        link_token_request = LinkTokenCreateRequest(
+    user_id = str(request.user.id)
+    link_token_request = LinkTokenCreateRequest(
+            user = LinkTokenCreateRequestUser(client_user_id = user_id),
             products = [Products("transactions")],
             client_name = "FinBoard",
-            country_codes = [CountryCode["US"]],
+            country_codes = [CountryCode("US")],
             language = 'en',
-            user = LinkTokenCreateRequestUser(client_user_id = str(request.user.id))
+            
         )
+    try:
         response = client.link_token_create(link_token_request)
         return JsonResponse(response.to_dict())
     except ApiException as e:
@@ -94,7 +98,7 @@ def save_access_token(request):
             
             PlaidCredentials.objects.update_or_create(
                 user = request.user,
-                defaults ={'access_token' : access_token, 'item_id' : item_id}
+                defaults = {'access_token' : access_token, 'item_id' : item_id}
             )
             return JsonResponse({'success':True},)
         except ApiException as e:
@@ -107,6 +111,35 @@ def save_access_token(request):
     
     return JsonResponse({'error' : 'Invalid request method'}, status = 400)  
 
+def plaid_link(request):
+    return render(request, 'finance/plaid_link.html')
+
+def sync_transactions(request):
+    try:
+     plaid_creds = PlaidCredentials.objects.get(user=request.user)
+     access_token = plaid_creds.access_token
+     
+     sync_request = TransactionsSyncRequest(access_token = access_token)
+     response = client.transactions_sync(sync_request)
+     transactions = response['added']
+
+     for transaction in transactions:
+         amount = abs(transaction['amount'])
+         transaction_type = 'income' if transaction['amount']<0 else 'expense'
+
+         Transaction.objects.update_or_create(
+             transaction_id = transaction['transaction_id'],
+             defaults = {
+                 'user' : request.user,
+                 'amount' : amount,
+                 'type' : transaction_type,
+                 'description' : transaction['merchant_name'] or transaction['name'],
+                 'date' : transaction['date'],
+             }
+         )
+     return JsonResponse({'success': True, 'synced_count':len(transactions)})
+    except PlaidCredentials.DoesNotExist:
+        return JsonResponse({'error':'User has no Plaid credentials'}, status = 400)
 
 
     

@@ -3,9 +3,8 @@
 {% block content %}
     <h1>Welcome, {{ user.email }}</h1>
     <p>You are logged in. This is the dashboard.</p>
-    <div style = "margin:20px;">
-        <button id = "connect-bank" style = "padding:10px; font-size:16px;">Connect your bank</button>
-    </div>
+    <button id="sync-transactions">Sync transactions</button>
+    
 
     <form method = "get">
             <input type="radio" name="type" value="all" {% if filter_type == 'all' %}checked{% endif %}>
@@ -44,69 +43,50 @@
     <a href="{% url 'list_transactions' %}">Check all transactions</a>
     <a href="{% url 'add_transaction' %}">Add a transaction</a>
 
-    <!--Plaid-->
-    <script src = "https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
     {% csrf_token %}
-    <scipt>
-        const csrfToken = decoment.querySelector('[name = csrfmiddlewaretoken]').value;
-        const connectButon = document.getElementById('connect-bank');
+    <script>
+        document.addEventListener('DOMContentLoaded', () =>{
+            const syncButton = document.getElementById("sync-transactions");
 
-        connectButon.addEventListener('click', async () => {
-            try {
-                const response = await fetch('{% url "get_plaid_token" %}',{
-                    headers: {
-                        'Content-Type' : 'application/json',
-                        'X-CSRFToken' : csrfToken,
-                    },
-                });
-                if (!response.ok){
-                    throw new Error('Failed to get link token');
+            const messageArea = document.createElement("div");
+            messageArea.style.marginTop = "10px";
+            syncButton.parentNode.insertBefore(messageArea, syncButton.nextSibling);
+
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+            syncButton.addEventListener('click', async () =>{
+                messageArea.textContent = 'Syncing...';
+                messageArea.style.color = 'blue';
+
+                try {
+                    const response = await fetch('{% url "sync_transactions" %}',{
+                        method : 'POST',
+                        headers : {
+                            'Content-Type' : 'application/json',
+                            'X-CSRFToken' : csrfToken,
+                        },
+                        body : JSON.stringify({}),
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        
+                        messageArea.textContent = `Success! Synced ${result.synced_count} transactions.`;
+                        messageArea.style.color = 'green';
+                        
+                        setTimeout(() => {window.location.reload();}, 1000);
+                    } else {
+                        messageArea.textContent = `Error ${result.error}.`;  // ` template literal
+                        messageArea.style.color = 'red';
+                    }
+                } catch (error) {
+                    messageArea.textContent = `An error occured: ${error.message}.`;
+                    messageArea.style.color = 'red';
+
                 }
-                const data = await response.json();
-                const linkToken = data.link_token;
-
-                const handler = Plaid.create({
-                    token : linkToken,
-                    onSuccess : async (public_token, metadata) => {
-                        console.log('Public token recieved:', public_token);
-                        console.log('Metadata:', metadata);
-
-                        try {
-                            const saveResponse = await fetch('{% url 'save_access_token' %}',
-                            {method : 'POST',
-                             headers : {
-                                'Content-Type' : 'application/json',
-                                'X-CSRFToken' : csrfToken,
-                             },
-                             body : JSON.stringify({public_token : public_token})
-                        });
-                            const saveResult = await saveResponse.json();
-                            if (saveResult.success){
-                                console.log('Access token saved successfully!');
-                                alert('Bank account connected successfully!');
-                            }else {
-                                console.error('Failed to save access token:', saveResult.error);
-                                alert('An error occured while saving the bank connection.');
-                            }
-                        } catch (error) {
-                            console.error('Error saving access token:', error);
-                            alert('An error occured while communicating with the server');
-
-                        }
-                    },
-                    onExit : (err, metadata) => {
-                        console.log('Plaid link exited.');
-                        if (err != null){
-                            console.error('Plaid link error:', err);
-                        }
-                    },
-                });
-
-                handler.open()
-            } catch (error) {
-                console.error('Error connecting to bank:', error);
-                alert('Could not connect to Plaid. Please try again later.');
-            }
-        });
-    </scipt>
+            })
+        })
+    </script>
+    
 {% endblock content %}

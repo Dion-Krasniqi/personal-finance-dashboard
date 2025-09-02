@@ -40,8 +40,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
-    access_token = models.CharField(max_length=100, null=True)
-    item_id = models.CharField(max_length=100,null=True)
+    #access_token = models.CharField(max_length=100, null=True)
+    #item_id = models.CharField(max_length=100,null=True)
 
     objects = CustomeUserManager()
 
