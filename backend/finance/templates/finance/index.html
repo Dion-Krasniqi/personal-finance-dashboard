@@ -1,0 +1,24 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Buxheti</title>
+    </head>
+    <body>
+        <div id='root'></div> <!--where react app is injected-->
+        <!--Plaid-->
+        <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
+        <!--React-->
+        <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+        <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+        <!--Babel, compiler but for like new language can be understood by web browser-->
+        <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+        <script type="text/babel" src="{% static 'App.jsx' %}"></script>
+
+
+    </body>
+
+</html>

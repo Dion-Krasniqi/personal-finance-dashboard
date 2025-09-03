@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
+from django.views.generic import TemplateView
 from .utils import filter_transactions
 import plaid
 from plaid.api import plaid_api
@@ -143,3 +144,5 @@ def sync_transactions(request):
 
 
     
+class ReactDashboardView(TemplateView):
+    template_name = 'finance/index.html'

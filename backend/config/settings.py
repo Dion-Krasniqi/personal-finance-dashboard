@@ -134,3 +134,7 @@ LOGIN_REDIRECT_URL = "/accounts/dashboard/"
 LOGOUT_REDIRECT_URL = "/"
 
 # TEMPLATES[0]["DIRS"] = [BASE_DIR / "templates"] # is changing the entry at the TEMPLATES def higher
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR.parent, 'frontend', 'finance'),
+]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')

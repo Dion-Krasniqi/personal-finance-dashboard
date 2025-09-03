@@ -9,4 +9,6 @@ urlpatterns = [
     path('plaid/get_plaid_token/', views.get_plaid_token, name = 'get_plaid_token'),
     path('plaid/save_access_token/', views.save_access_token, name = 'save_access_token'),
     path('plaid/sync_transactions/', views.sync_transactions, name = 'sync_transactions'),
+
+    path('', views.ReactDashboardView.as_view(), name='react-dashboard'),
 ]
