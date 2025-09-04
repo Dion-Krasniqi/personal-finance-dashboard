@@ -146,3 +146,13 @@ def sync_transactions(request):
     
 class ReactDashboardView(TemplateView):
     template_name = 'finance/index.html'
+
+def get_sample_data(TemplateView):
+    sample_data = {
+        'message':'Hello',
+        'data':[
+            {'id':1,'name':'Item A'},
+            {'id':2,'name':'Item B'},
+        ]
+    }
+    return JsonResponse(sample_data)
