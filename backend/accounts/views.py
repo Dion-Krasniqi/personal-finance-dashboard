@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.contrib import messages
 from django.contrib.auth.views import LoginView, LogoutView
 from django.views.generic import CreateView
@@ -65,6 +65,24 @@ def dashboard(request):
                                                         "balance" : balance,
                                                         "search_query" : search_query,
                                                     })
+
+@login_required
+def dashboard_api(request):
+    transactions = Transaction.objects.filter(user=request.user)
+    income = transactions.filter(type = 'income').aggregate(total = Sum('amount'))['total'] or 0
+    expenses = transactions.filter(type = 'expense').aggregate(total = Sum('amount'))['total'] or 0
+    balance = income - expenses
+    transactions = list(transactions.values())
+
+    data = {
+            'user_email':request.user.email,
+            'transactions':transactions,
+            'income':income,
+            'expenses':expenses,
+            'balance':balance,
+            }
+    
+    return JsonResponse(data)
 
 
 def feedback_view(request):
