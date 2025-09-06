@@ -156,3 +156,21 @@ def get_sample_data(TemplateView):
         ]
     }
     return JsonResponse(sample_data)
+
+@csrf_exempt
+@login_required
+def create_transaction(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            transaction = Transaction.objects.create(user=request.user,
+                                                     description = data['description'],
+                                                     amount=data['amount'],
+                                                     type=data['type'])
+            return JsonResponse({"message":"Transaction created", 'id':transaction.transaction_id}, status=201)
+        except json.JSONDecodeError:
+            return JsonResponse({"error":"Invalid JSON format"}, status=400)
+        except KeyError as e:
+            return JsonResponse({"error":f'Missing key: {e}'},status=400)
+
+    return JsonResponse({"error":"Invalid request method"}, status=405)

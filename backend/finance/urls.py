@@ -12,4 +12,5 @@ urlpatterns = [
 
     path('', views.ReactDashboardView.as_view(), name='react-dashboard'),
     path('sample_data/',views.get_sample_data, name='get_sample_data'),
+    path('create_transaction/', views.create_transaction, name='create-transaction')
 ]
