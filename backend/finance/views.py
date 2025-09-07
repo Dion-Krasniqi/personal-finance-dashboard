@@ -174,3 +174,15 @@ def create_transaction(request):
             return JsonResponse({"error":f'Missing key: {e}'},status=400)
 
     return JsonResponse({"error":"Invalid request method"}, status=405)
+
+@csrf_exempt
+@login_required
+def delete_transaction(request, transaction_id):
+    if request.method == 'DELETE':
+        try: 
+            transaction = Transaction.objects.filter(id=transaction_id, user=request.user)
+            transaction.delete()
+            return JsonResponse({"message":"Transaction deleted successfully."}, status=200)
+        except Transaction.DoesNotExist:
+            return JsonResponse({"erros":"Transaction not found."}, status=404)
+    return JsonResponse({"error":"Invalid request method."}, status=405)

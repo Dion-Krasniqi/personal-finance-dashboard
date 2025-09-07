@@ -11,6 +11,7 @@ urlpatterns = [
     path('plaid/sync_transactions/', views.sync_transactions, name = 'sync_transactions'),
 
     path('', views.ReactDashboardView.as_view(), name='react-dashboard'),
-    path('sample_data/',views.get_sample_data, name='get_sample_data'),
-    path('create_transaction/', views.create_transaction, name='create-transaction')
+    path('sample_data/',views.get_sample_data, name='get-sample-data'),
+    path('transaction/create/', views.create_transaction, name='create-transaction'),
+    path('transaction/delete/<int:transaction_id>/', views.delete_transaction, name='delete-transaction'),
 ]
