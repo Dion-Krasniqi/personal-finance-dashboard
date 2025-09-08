@@ -9,6 +9,7 @@ from django.utils.timezone import now
 from finance.models import Transaction
 from finance.utils import filter_transactions
 from django.db.models import Sum
+from datetime import date
 
 from .forms import UserRegistrationForm, LoginForm, RegistrationForm, FeedbackForm, ProfileForm
 from .models import CustomUser, Feedback
@@ -66,23 +67,6 @@ def dashboard(request):
                                                         "search_query" : search_query,
                                                     })
 
-@login_required
-def dashboard_api(request):
-    transactions = Transaction.objects.filter(user=request.user)
-    income = transactions.filter(type = 'income').aggregate(total = Sum('amount'))['total'] or 0
-    expenses = transactions.filter(type = 'expense').aggregate(total = Sum('amount'))['total'] or 0
-    balance = income - expenses
-    transactions = list(transactions.values())
-
-    data = {
-            'user_email':request.user.email,
-            'transactions':transactions,
-            'income':income,
-            'expenses':expenses,
-            'balance':balance,
-            }
-    
-    return JsonResponse(data)
 
 
 def feedback_view(request):
@@ -131,3 +115,29 @@ def profile_view(request):
             form = ProfileForm(instance = user)
 
     return render(request, "accounts/profile.html", {"form" : form})
+
+@login_required
+def dashboard_api(request):
+    transactions = Transaction.objects.filter(user=request.user)
+    income = transactions.filter(type = 'income').aggregate(total = Sum('amount'))['total'] or 0
+    expenses = transactions.filter(type = 'expense').aggregate(total = Sum('amount'))['total'] or 0
+    balance = income - expenses
+    transactions = list(transactions.values())
+
+    data = {
+            'user_email':request.user.email,
+            'transactions':transactions,
+            'income':income,
+            'expenses':expenses,
+            'balance':balance,
+            }
+    
+    return JsonResponse(data)
+
+
+
+            
+            
+        
+
+

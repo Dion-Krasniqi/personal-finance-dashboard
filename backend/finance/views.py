@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.views.generic import TemplateView
+from django.db.models import Sum
 from .utils import filter_transactions
 import plaid
 from plaid.api import plaid_api
@@ -14,6 +15,7 @@ from plaid.model.item_public_token_exchange_request import ItemPublicTokenExchan
 from plaid.exceptions import ApiException
 from plaid.model.transactions_sync_request import TransactionsSyncRequest
 import os, json, logging
+from datetime import date
 from dotenv import load_dotenv
 
 from .forms import TransactionForm
@@ -184,5 +186,45 @@ def delete_transaction(request, transaction_id):
             transaction.delete()
             return JsonResponse({"message":"Transaction deleted successfully."}, status=200)
         except Transaction.DoesNotExist:
-            return JsonResponse({"erros":"Transaction not found."}, status=404)
+            return JsonResponse({"error":"Transaction not found."}, status=404)
     return JsonResponse({"error":"Invalid request method."}, status=405)
+
+@csrf_exempt
+@login_required
+def search_transactions(request):
+    query_set = Transaction.objects.filter(user=request.user)
+
+    description_query = request.GET.get('description')
+    type_query = request.GET.get('type')
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+
+    if description_query:
+        query_set = query_set.filter(description__icontains=description_query)
+    if type_query:
+        query_set = query_set.filter(type=type_query)    
+    if start_date and end_date:
+        try:
+            start_date = date.fromisoformat(start_date)
+            end_date = date.fromisoformat(end_date)
+            query_set = query_set.filter(date__range =[start_date,end_date])
+        except ValueError:
+            return JsonResponse({"error":"Invalid date format. Use YYYY-MM-DD"}, status=400)
+        
+
+    income = query_set.filter(type = 'income').aggregate(total = Sum('amount'))['total'] or 0
+    expenses = query_set.filter(type = 'expense').aggregate(total = Sum('amount'))['total'] or 0
+                    
+            
+    balance = income - expenses
+    query_set = list(query_set.values())
+
+    data = {
+        'user_email':request.user.email,
+        'transactions':query_set,
+        'income':income,
+        'expenses':expenses,
+        'balance':balance,
+        }
+
+    return JsonResponse(data, status=200)

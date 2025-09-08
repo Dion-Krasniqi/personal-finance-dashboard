@@ -14,4 +14,5 @@ urlpatterns = [
     path('sample_data/',views.get_sample_data, name='get-sample-data'),
     path('transaction/create/', views.create_transaction, name='create-transaction'),
     path('transaction/delete/<int:transaction_id>/', views.delete_transaction, name='delete-transaction'),
+    path('transaction/search/', views.search_transactions, name='search-transactions'),
 ]
