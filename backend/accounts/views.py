@@ -46,26 +46,8 @@ class RegisterView(CreateView):
     template_url = "accounts/register.html"
     success_url = reverse_lazy("login") # after registering, redirects to log in
 
-@login_required
-def dashboard(request):
-    user = request.user
-    today = now().date()
-    year, month = today.year, today.month
 
 
-    qs = Transaction.objects.filter(user = user, date__year = today.year, date__month = today.month)
-    transactions, filter_type, search_query, start_date, end_date = filter_transactions(request, qs)
-
-    income = transactions.filter(type = 'income').aggregate(total = Sum('amount'))['total'] or 0 # if there isnt any, it doesnt return None but 0
-    expenses = transactions.filter(type = 'expense').aggregate(total = Sum('amount'))['total'] or 0
-    balance = income - expenses
-
-    return render(request, "accounts/dashboard.html", { "transactions" : transactions,
-                                                        "income" : income,
-                                                        "expenses" : expenses,
-                                                        "balance" : balance,
-                                                        "search_query" : search_query,
-                                                    })
 
 
 
@@ -115,28 +97,6 @@ def profile_view(request):
             form = ProfileForm(instance = user)
 
     return render(request, "accounts/profile.html", {"form" : form})
-
-@login_required
-def dashboard_api(request):
-    transactions = Transaction.objects.filter(user=request.user)
-    income = transactions.filter(type = 'income').aggregate(total = Sum('amount'))['total'] or 0
-    expenses = transactions.filter(type = 'expense').aggregate(total = Sum('amount'))['total'] or 0
-    balance = income - expenses
-    transactions = list(transactions.values())
-
-    data = {
-            'user_email':request.user.email,
-            'transactions':transactions,
-            'income':income,
-            'expenses':expenses,
-            'balance':balance,
-            }
-    
-    return JsonResponse(data)
-
-
-
-            
             
         
 

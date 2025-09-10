@@ -23,7 +23,7 @@ from .models import Transaction, PlaidCredentials
 
 logger = logging.getLogger(__name__)
 # Create your views here.
-@login_required
+#@login_required
 def add_transaction(request):
     if request.method == "POST":
         form = TransactionForm(request.POST)
@@ -38,7 +38,7 @@ def add_transaction(request):
     return render(request, "finance/add_transaction.html", {"form" : form})
 
 
-@login_required
+#@login_required
 def list_transactions(request):
     qs = Transaction.objects.filter(user = request.user).order_by('-date')
     transactions, type_filter, search_query, start_date, end_date = filter_transactions(request, qs)
@@ -63,8 +63,8 @@ configuration = plaid.Configuration(
 api_client = plaid.ApiClient(configuration)
 client = plaid_api.PlaidApi(api_client)
 
-@csrf_exempt
-@login_required
+#@csrf_exempt
+#@login_required
 def get_plaid_token(request):
     user_id = str(request.user.id)
     link_token_request = LinkTokenCreateRequest(
@@ -85,8 +85,8 @@ def get_plaid_token(request):
         logger.error(f"An unexpected error occured: {e}")
         return JsonResponse({'error' : str(e)}, status = 500)
 
-@csrf_exempt # just for the current setup
-@login_required
+#@csrf_exempt # just for the current setup
+#@login_required
 def save_access_token(request):
     if request.method == 'POST':
         try:
@@ -159,8 +159,8 @@ def get_sample_data(TemplateView):
     }
     return JsonResponse(sample_data)
 
-@csrf_exempt
-@login_required
+#@csrf_exempt
+#@login_required
 def create_transaction(request):
     if request.method == 'POST':
         try:
@@ -177,8 +177,8 @@ def create_transaction(request):
 
     return JsonResponse({"error":"Invalid request method"}, status=405)
 
-@csrf_exempt
-@login_required
+#@csrf_exempt
+#@login_required
 def delete_transaction(request, transaction_id):
     if request.method == 'DELETE':
         try: 
@@ -189,10 +189,13 @@ def delete_transaction(request, transaction_id):
             return JsonResponse({"error":"Transaction not found."}, status=404)
     return JsonResponse({"error":"Invalid request method."}, status=405)
 
-@csrf_exempt
-@login_required
+
+
+#@csrf_exempt
+#@login_required
 def search_transactions(request):
-    query_set = Transaction.objects.filter(user=request.user)
+    query_set = Transaction.objects.all()
+    
 
     description_query = request.GET.get('description')
     type_query = request.GET.get('type')
@@ -220,11 +223,11 @@ def search_transactions(request):
     query_set = list(query_set.values())
 
     data = {
-        'user_email':request.user.email,
+        #'user_email':'visualizer1@mail.com',
         'transactions':query_set,
         'income':income,
         'expenses':expenses,
         'balance':balance,
         }
-
+    
     return JsonResponse(data, status=200)

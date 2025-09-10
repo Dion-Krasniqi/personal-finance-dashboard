@@ -1,3 +1,9 @@
+import React from "react";
+
+
+
+
+
 const App = () => {
     const [dashboardData, setDashboardData] = React.useState(null);
     const [loading, setLoading] = React.useState(true);
@@ -16,7 +22,7 @@ const App = () => {
             setError(null);
             try {
                 const query = new URLSearchParams(searchParams).toString();
-                const query_url = `/finance/transaction/search/?${query}`;
+                const query_url = `http://192.168.1.9:8000/finance/transaction/search/?${query}`;
 
                 const response = await fetch(query_url);
                 
@@ -63,7 +69,7 @@ const App = () => {
         setFormMessage('');
 
         try {
-            const response = await fetch('finance/transaction/create/', {method: 'POST', headers: {
+            const response = await fetch('http://192.168.1.9:8000/finance/transaction/create/', {method: 'POST', headers: {
                 'Content-Type':'application/json',},
                 body: JSON.stringify(formState),
             });
@@ -91,7 +97,7 @@ const App = () => {
             return;
         }
         try {
-            const response = await fetch(`finance/transaction/delete/${transaction_id}/`,{method:'DELETE'});
+            const response = await fetch(`http://192.168.1.9:8000/finance/transaction/delete/${transaction_id}/`,{method:'DELETE'});
         
             const result = await response.json();
             if (!response.ok){
@@ -141,16 +147,18 @@ const App = () => {
     return (
         <div className="container mx-auto p-4 md:p-8 space-y-8">
             <header className="bg-white rounded-xl shadow-md p-6">
-                <h1 className="text-3x1 font-bold text-gray-800">Welcome, {dashboardData.user_email}</h1>
+                <h1 className="text-3x1 font-bold text-gray-800">Welcome dude</h1>
                 <p className="text-gray-600 mt-1">Your financial overview</p>
+                
             </header>
             
-
+            
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="bg-white rounded-xl shadow-md p-6 flex flex-col justify-between">
                     <div className="flex items-center justify-between">
                         <p className="text-lg font-medium text-gray-500">Balance</p>
                         <span className={`text-2x1 font-bold ${dashboardData.balance >=0 ? 'text-blue-600':'text-red-600'}`}>
+                            
                             {formatCurrency(dashboardData.balance)}</span>
                     </div>
                 </div>
@@ -265,6 +273,4 @@ const App = () => {
     );
 };
 
-const rootElement = document.getElementById('root');
-const root = ReactDOM.createRoot(rootElement);
-root.render(React.createElement(App));
+export default App;
