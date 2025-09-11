@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model
 from django import forms
-from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm, UserChangeForm
 
 from .models import CustomUser, Feedback
 
@@ -33,7 +33,11 @@ class UserRegistrationForm(forms.ModelForm):
         if commit:
             user.save()
         return user
-    
+
+class CustomUserChangeForm(UserChangeForm):
+    class Meta:
+        model = CustomUser
+        fields = ("email",)
 
 class LoginForm(AuthenticationForm):
     username = forms.EmailField(label = "Email")
