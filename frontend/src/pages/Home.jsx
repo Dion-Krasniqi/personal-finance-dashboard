@@ -27,10 +27,29 @@ export default function Home () {
     }};
      checkLoggedIn()}, [])
 
+     const handleLogout = async () => {
+        try {
+          const refreshToken = localStorage.getItem('refreshToken');
+          const token = localStorage.getItem('accessToken');
+          const config = { headers: {'Authorization':`Bearer ${token}`}};
+          if (refreshToken) {
+            await axios.post('http://192.168.1.9:8000/accounts/logout/',{'refresh': refreshToken}, config);
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            setisLoggedIn(false);
+            setEmail('');
+          }
+
+        } catch(error) {
+          console.log('Failed to log out')
+        }
+     }
+
   
   return (
     <div>
       {isLoggedIn ? (<div>Hi, {email}</div>):('Please log in')}
+      <button onClick={handleLogout}></button>
     </div>
     
   )
