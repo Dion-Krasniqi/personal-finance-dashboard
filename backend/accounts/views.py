@@ -11,7 +11,7 @@ from finance.utils import filter_transactions
 from django.db.models import Sum
 from datetime import date
 
-from rest_framework.generics import GenericAPIView
+from rest_framework.generics import GenericAPIView, RetrieveAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken 
 from rest_framework.response import Response
@@ -27,17 +27,6 @@ from .models import CustomUser, Feedback
 
 def home(request):
     return HttpResponse("Welcome to the Accounts App")
-
-def register(request):
-    if request.method == "POST":
-        form = UserRegistrationForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Account created successfully!")
-            return redirect("login")
-    else:
-        form = UserRegistrationForm()
-    return render(request, "accounts/register.html", { "form":form })  
 
 class UserRegistrationAPI_view(GenericAPIView):
     permission_classes = [AllowAny]
@@ -67,7 +56,7 @@ class UserLoginAPI_view(GenericAPIView):
         token = RefreshToken.for_user(user)
         data = serializer.data
         data['tokens'] = {'refresh':str(token),
-                          'access':str(token.acces_token)}
+                          'access':str(token.access_token)}
         return Response(data, status=status.HTTP_200_OK)
     
 
@@ -83,20 +72,14 @@ class UserLogoutAPI_view(GenericAPIView):
         except Exception as e:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
-class CustomLoginView(LoginView):
-    template_name = "accounts/login.html"
-    authentication_form = LoginForm
 
-class CustomLogoutView(LogoutView):
-    next_page = "/"
+class UserInfoAPI_view(RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = CustomUserSerializer
 
-class RegisterView(CreateView):
-    model = CustomUser
-    form_class = RegistrationForm
-    template_url = "accounts/register.html"
-    success_url = reverse_lazy("login") # after registering, redirects to log in
-
-
+    def get_object(self):
+        print('came')
+        return self.request.user
 
 
 
